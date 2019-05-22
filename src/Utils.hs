@@ -48,17 +48,17 @@ names =
 mkNodes :: [G.LNode String]
 mkNodes = zip [start..end] names
 
-mkEdges :: Int -> IO [G.LEdge String]
-mkEdges n = do
+mkEdges :: Int -> Int -> IO [G.LEdge String]
+mkEdges end' n = do
   seed1 <- newStdGen
   seed2 <- newStdGen
   return $ zipWith (\a b -> (a,b,"")) (mkInts seed1) (mkInts seed2)
   where
-    mkInts seed = take n $ randomRs (start,end) seed
+    mkInts seed = take n $ randomRs (start,end') seed
 
 mkGraph :: IO (G.Gr String String)
 mkGraph = do
-  edges <- mkEdges 100
+  edges <- mkEdges end 100
   return $ G.mkGraph mkNodes edges
 
 mkPng :: G.Gr String String -> G.Path -> IO ()
@@ -74,7 +74,9 @@ mkPng gr sp = do
              , GV.fillColor $ getNodeColor i sp
              , GV.toLabel l ],
         GV.fmtEdge = \(from, to, _)
-          -> [GV.style GV.filled, GV.color $ getEdgeColor from to sp]
+          -> [ GV.style GV.filled
+             , GV.color $ getEdgeColor from to sp
+             , GV.edgeEnds GV.NoDir]
       }
     getNodeColor i sp
       | i == start || i == end = GV.Green

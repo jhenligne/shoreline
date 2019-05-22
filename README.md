@@ -1,8 +1,7 @@
 # Shoreline
 This repository was motivated by a problem submitted on a job offer. Sections [Problem](#problem) and [Instructions](#instructions) describe company's expectation. Other ones explain the choices I made to implement it and my answers to the questions.
 
-![](graph.png)
-## <a name="problem">Problem</a>
+## <a name="problem"></a>Problem
 
 We are building a social network.  In this social network, each user has friends.
 
@@ -10,7 +9,7 @@ A chain of friends between two users, user A and user B, is a sequence of users 
 
 Given a social network and two users, user A and user B, please write a function that computes the length of the shortest chain of friends between A and B.
 
-## <a name="instructions">Instructions</a>
+## <a name="instructions"></a>Instructions
 Please write answers to the following discussion questions and include them in your solution as comments:
 
 * How did you represent the social network?  Why did you choose this representation?
@@ -48,6 +47,48 @@ The function `esp :: Graph gr => Node -> Node -> gr a b -> Path` (edges shortest
 
 * Please enumerate the test cases you considered and explain their relevance.  
 
-Here they are: ![](tests.png)  
+Here they are:  
+<p align="center">
+  <img src="tests.png" alt="Tests" width="75%" height="75%">
+</p>
 
-Besides the obvious test whether the shortest path is found or not, it is important to test the algorithm against a **cyclic graph** to see if nodes are explored only once. The last test check the **time complexity** with a huge number of edges. 
+Besides the obvious test whether the shortest path is found or not, it is important to test the algorithm against a **cyclic graph** to see if nodes are explored only once. The last test check the **time complexity** with a huge number of edges.  
+It creates a graph of 1415 nodes with edges connecting each node against all nodes, including itself, resulting in 2.003.640 edges (1415<sup>2</sup> is 2.002.225 but each edge from a node to itself is also bidirectional from itself to node...).  
+
+Those indexes tests should also be implemented but they are not related to graphs:  
+
+```haskell
+let n     = 50  --nummber of nodes in the graph
+    start = 0   --start node
+    end   = n-1 --end node
+in (0 <= start && start <= n) && (0 <= end && end <= n)
+```
+
+## BFS algorithm
+### Behavior
+A good description of BFS behavior is in the figure below (taken from [www.hackerearth.com](https://www.hackerearth.com/fr/practice/notes/graph-theory-breadth-first-search/)).  
+Beware there is a small mistake in graph 4: the level 3 set should not draw an edge between nodes 9 and 5 but between nodes 7 and 5.
+<p align="center">
+  <img src="bfs.jpg" alt="Breadth First Search" width="50%" height="50%">
+</p>
+
+### Functional Graph Library implementation
+To build this graph
+
+<p align="center">
+  <img src="graph.png" alt="Graph" width="75%" height="75%">
+</p>
+
+with the edges on the left, `fgl` will generate the paths on the right
+<p align="center">
+  <img src="edges-paths.png" alt="Edges and Paths" width="75%" height="75%">
+</p>
+
+This graph is clearly undirected. Each pair of nodes linked has in fact 2 edges. For example "Layne Barcus" (line 1 on the left) has an edge with "Bong Reeves" (line 7 on the left) and vice versa.  
+
+The growing length of the paths reflects the behavior described above. It is confirmed if we look how each path is added. For example we start with the node "Kaci Sunde" (line 1 on the right). Lines 2 to 4 add paths to the 3 direct siblings of "Kaci Sunde". Lines 5 to 18 start anew with each of these 3 direct siblings. This traversal continues until there are no nodes.
+
+#### Code
+A hand made diagram to have a better understanding of [Functional Graph Library](http://hackage.haskell.org/package/fgl)' BFS implementation:
+
+<img src="bfs-fgl.png" alt="fgl implementation of BFS">
